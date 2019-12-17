@@ -1,62 +1,86 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
-const User = require("../../models/user");
+const User = require('../../models/user');
+const config = require('config');
+const jwt = require('jsonwebtoken');
+const auth = require('../../middleware/auth');
 
-router.get('/', (req, res) => {
-    //Log all users
-
-    User.find({}, (err, docs) => {
-        console.log(docs.length);
-        res.send(docs);
-    });
+router.get('/', auth, async (req, res) => {
+    console.log(req.user);
+    res.send("Nice");
 });
 
-router.get('/login', (req, res) => {
-    let password = req.body['password'];
-    let email = req.body['email'];
-    
+router.get('/login', async (req, res) => {
+    let {password, email} = req.body;
+
     //Check if email is in DB
     //If not, send and error reponse
     //If it is, get hash and compare
 
-    User.find({email: email}, (err, docs) => {
-        if(docs.length != 0){
-            let match = bcrypt.compare(password, docs[0].password);
+    try {
+        const user = await User.findOne({email: email});
+        if(user){
+            let match = bcrypt.compare(password, user.password);
             if(match){
-                //Valid, issue a token?
-                res.send("Correct password! Consider yourself logged in!");
+                //res.send("Correct password! Consider yourself logged in!");
+                const payload = {
+                    user: {
+                      id: user._id
+                    }
+                };
+                jwt.sign(
+                    payload,
+                    config.get('jwtSecret'),
+                    { expiresIn: 36000000 },
+                    (err, token) => {
+                      if (err) throw err;
+                      res.json({ token });
+                    }
+                  );
             }
         }else{
             res.send("No user with that email");
         }
-    });
+    } catch (e) {
+        res.status(400).json({message: e})
+    }
 });
 
-router.post('/register', (req, res) => {
-    let password = req.body['password'];
-    let email = req.body['email'];
-    
+router.post('/register', async (req, res) => {
+    let {password, email} = req.body;
+
     //Check if email is in DB
     //If not, store email and hash
     //If it is, send an error respose
 
-    User.find({email: email}, (err, docs) => {
-        if(docs.length != 0){
+    try {
+        let user = await User.findOne({email: email});
+        console.log(user);
+        if(user) {
             res.send("Email taken");
-        }else{
-            let hash = bcrypt.hashSync(password, 8);
-            const newUser = new User({
+        } else {
+            let salt = await bcrypt.genSalt(10);
+            let hash = bcrypt.hashSync(password, salt);
+            let newUser = new User({
                 email: email,
                 password: hash
             });
-            newUser.save().then(user => res.send(user)).catch((e) => {res.status(500).send(e)});
+            await newUser.save();
+            res.send(newUser);
         }
-    });
+    } catch (e) {
+        res.status(400).message({message: e});
+    }
 });
 
-router.delete('/', (req, res) => {
-    User.deleteMany().then(() => {res.send('Deleting Everything!')});
+router.delete('/', async (req, res) => {
+    try {
+        await User.deleteMany();
+        res.send('Gone!');
+    } catch (e) {
+        res.status(400).message({message: e});
+    }
 });
 
 module.exports = router;
