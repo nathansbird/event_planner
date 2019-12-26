@@ -8,7 +8,7 @@ const auth = require('../../middleware/auth');
 
 router.get('/', auth, async (req, res) => {
     console.log(req.user);
-    res.send("Nice");
+    res.send(req.headers["x-auth-token"]);
 });
 
 router.get('/login', async (req, res) => {
@@ -74,6 +74,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
+//TODO: Get rid of this!!!
 router.delete('/', async (req, res) => {
     try {
         await User.deleteMany();

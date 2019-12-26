@@ -33,7 +33,7 @@ const EventSchema = Schema({
       type: String
     },
     timestamp: {
-      type: Date,
+      type: Number,
       default: Date.now()
     }
 });
