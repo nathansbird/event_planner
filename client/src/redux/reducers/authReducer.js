@@ -22,6 +22,12 @@ export default function(state = initialState, action) {
       }
     case types.REGISTER_FAIL:
     case types.USER_LOADED:
+      return {
+        ...state,
+        isAuthenticated: true,
+        loading: false,
+        user: payload
+      }
     case types.AUTH_ERROR:
     case types.LOGIN_FAIL:
     case types.LOGOUT:

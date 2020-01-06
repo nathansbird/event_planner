@@ -25,7 +25,8 @@ export const loadUser = () => async dispatch => {
     }
   };
 
-export const register = (name, email, password) => async dispatch => {
+export const register = (data) => async dispatch => {
+  
   const config = {
     headers: {
       'Content-Type': 'application/json'
@@ -33,8 +34,8 @@ export const register = (name, email, password) => async dispatch => {
   };
 
   try {
-    const res = await axios.post('/api/auth/register', {name, email, password}, config);
-    
+    const res = await axios.post('api/auth/register', data, config);
+    console.log(res);
     dispatch({
         type: types.REGISTER_SUCCESS,
         payload: res.data

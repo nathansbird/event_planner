@@ -7,11 +7,27 @@ const jwt = require('jsonwebtoken');
 const auth = require('../../middleware/auth');
 
 router.get('/', auth, async (req, res) => {
+    console.log('GET: /auth/')
+
     console.log(req.user);
-    res.send(req.headers["x-auth-token"]);
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+});
+
+router.get('/all', async (req, res) => {
+    const users = await User.find();
+    console.log(users);
+    res.send(200)
+});
+
+router.delete('/all', async (req, res) => {
+    const users = await User.deleteMany();
+    console.log(users);
+    res.send(200)
 });
 
 router.get('/login', async (req, res) => {
+    console.log('GET: /auth/login')
     let {password, email} = req.body;
 
     //Check if email is in DB
@@ -48,29 +64,48 @@ router.get('/login', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
+    console.log('POST: /auth/register')
+
     let {password, email} = req.body;
 
     //Check if email is in DB
     //If not, store email and hash
     //If it is, send an error respose
-
+    console.log(password, email);
     try {
         let user = await User.findOne({email: email});
-        console.log(user);
+        console.log(user)
         if(user) {
             res.send("Email taken");
         } else {
+            console.log('hit')
             let salt = await bcrypt.genSalt(10);
             let hash = bcrypt.hashSync(password, salt);
             let newUser = new User({
                 email: email,
                 password: hash
             });
-            await newUser.save();
-            res.send(newUser);
+            newUser.save();
+            
+            const payload = {
+                user: {
+                  id: newUser.id
+                }
+              };
+            console.log(newUser, payload);
+              jwt.sign(
+                payload,
+                config.get('jwtSecret'),
+                { expiresIn: 360000 },
+                (err, token) => {
+                  if (err) throw err;
+                  console.log(token);
+                  res.json({ token });
+                }
+              );
         }
     } catch (e) {
-        res.status(400).message({message: e});
+        res.status(400).json({message: e});
     }
 });
 
