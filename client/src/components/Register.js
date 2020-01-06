@@ -17,11 +17,12 @@ const Register = ({register, auth}) => {
   
   return(
     <div>
-      <input name="name" value={form.name} onChange={(e) => updateForm(e)} placeholder="Full Name"/>
-      <input name="email" value={form.email} onChange={(e) => updateForm(e)} placeholder="Email"/>
-      <input type="password" name="password" value={form.password} onChange={(e) => updateForm(e)} placeholder="Password"/>
-      <input type="password" name="password2" value={form.password2} onChange={(e) => updateForm(e)} placeholder="Confirm Password"/>
-      <button onClick={() => {register(form)}}>Submit</button>
+      <h1>Register</h1>
+      <input name="name" value={form.name} onChange={(e) => updateForm(e)} placeholder="Full Name"/><br/>
+      <input name="email" value={form.email} onChange={(e) => updateForm(e)} placeholder="Email"/><br/>
+      <input type="password" name="password" value={form.password} onChange={(e) => updateForm(e)} placeholder="Password"/><br/>
+      <input type="password" name="password2" value={form.password2} onChange={(e) => updateForm(e)} placeholder="Confirm Password"/><br/>
+      <button onClick={() => {register(form)}}>Create Account</button>
     </div>
   )
 }

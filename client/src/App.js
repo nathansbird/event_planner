@@ -4,6 +4,8 @@ import './App.css';
 import Home from './components/Home';
 import Login from './components/Login';
 import Register from './components/Register';
+import Dashboard from './components/Dashboard';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
@@ -12,6 +14,7 @@ function App() {
         <Route exact path='/'><Home/></Route>
         <Route path='/login'><Login/></Route>
         <Route path='/register'><Register/></Route>
+        <PrivateRoute path='/dashboard' component={Dashboard}/>
       </Switch>
     </div>
   );

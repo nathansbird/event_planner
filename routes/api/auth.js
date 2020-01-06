@@ -26,8 +26,8 @@ router.delete('/all', async (req, res) => {
     res.send(200)
 });
 
-router.get('/login', async (req, res) => {
-    console.log('GET: /auth/login')
+router.post('/login', async (req, res) => {
+    console.log('POST: /auth/login')
     let {password, email} = req.body;
 
     //Check if email is in DB
@@ -37,9 +37,10 @@ router.get('/login', async (req, res) => {
     try {
         const user = await User.findOne({email: email});
         if(user){
-            let match = bcrypt.compare(password, user.password);
+            let match = await bcrypt.compare(password, user.password);
             if(match){
                 //res.send("Correct password! Consider yourself logged in!");
+                console.log(password+" matches "+user.password);
                 const payload = {
                     user: {
                       id: user._id
@@ -54,6 +55,8 @@ router.get('/login', async (req, res) => {
                       res.json({ token });
                     }
                   );
+            }else{
+                res.send("Incorrect Password")
             }
         }else{
             res.send("No user with that email");
